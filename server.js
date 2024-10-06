@@ -10,7 +10,8 @@ const PORT = 3000;
 // Middleware for CORS and headers
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization'); // Ensure Authorization header is allowed
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
     next();
 });
 
@@ -19,15 +20,14 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // Secret key for JWT signing
-const secretKey = "My Secret Key";
+const secretKey = "MySecretKey";
 
 // JWT middleware for protected routes
 const jwtMW = exjwt({
     secret: secretKey,
     algorithms: ['HS256'],
-    credentialsRequired: true, // Ensure it checks for credentials in every request
+    credentialsRequired: true,
     getToken: function fromHeaderOrQuerystring(req) {
-        // Custom token extractor from headers or query string (if needed)
         if (req.headers.authorization && req.headers.authorization.split(' ')[0] === 'Bearer') {
             return req.headers.authorization.split(' ')[1]; // Extract token from Bearer <token>
         }
@@ -37,21 +37,13 @@ const jwtMW = exjwt({
 
 // Dummy users data
 let users = [
-    {
-        id: 1,
-        username: 'harsha',
-        password: '123'
-    },
-    {
-        id: 2,
-        username: 'mulge',
-        password: '456'
-    }
+    { id: 1, username: 'harsha', password: '123' },
+    { id: 2, username: 'mulge', password: '456' }
 ];
 
 // Protected route for dashboard
 app.get("/api/dashboard", jwtMW, (req, res) => {
-    console.log("Authorization header:", req.headers.authorization); // Log the token received
+    console.log("Authorization header:", req.headers.authorization);
     res.json({
         success: true,
         myContent: "Secret Content that only logged in people can view"
@@ -60,7 +52,7 @@ app.get("/api/dashboard", jwtMW, (req, res) => {
 
 // Protected route for settings
 app.get('/api/settings', jwtMW, (req, res) => {
-    console.log("Authorization header:", req.headers.authorization); // Log the token received
+    console.log("Authorization header:", req.headers.authorization);
     res.json({
         success: true,
         myContent: 'Settings page working!'
@@ -100,7 +92,7 @@ app.get("/", (req, res) => {
 // Error handling middleware for JWT errors
 app.use((err, req, res, next) => {
     if (err.name === 'UnauthorizedError') {
-        console.log("UnauthorizedError details:", err); // Log the exact error
+        console.log("UnauthorizedError details:", err);
         res.status(401).json({
             success: false,
             message: "Unauthorized access, invalid or expired token."

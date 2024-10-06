@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>JWT Authentication</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.7.7/axios.min.js" integrity="sha512-DdX/YwF5e41Ok+AI81HI8f5/5UsoxCVT9GKYZRIzpLxb8Twz4ZwPPX+jQMwMhNQ9b5+zDEefc+dcvQoPWGNZ3g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.7.7/axios.min.js"></script>
 </head>
 <body>
     <div class="container-fluid">
@@ -28,124 +28,72 @@
     </div>
 
     <script>
-        // Login function
         function login() {
             const data = {
                 username: document.getElementById('username').value,
                 password: document.getElementById('password').value,
             };
             axios.post('http://localhost:3000/api/login', data).then(res => {
-                console.log(res);
-                document.getElementById('username').value = '';
-                document.getElementById('password').value = '';
-                if (res && res.data && res.data.success) {
+                if (res.data.success) {
                     const token = res.data.token;
-                    console.log("Token received: ", token); // Debugging line
-                    localStorage.setItem('jwt', token); // Store the token
-                    getDashboard();
+                    localStorage.setItem('jwt', token); 
+                    console.log("Token stored:", token);
+                    getDashboard(); 
+                } else {
+                    alert('Login failed. Please check your credentials.');
                 }
             }).catch(err => {
-                console.error("Login failed:", err); // Log error in case login fails
+                console.error("Login error:", err);
             });
         }
 
-        // Token expiration check
         function isTokenExpired(token) {
-            if (!token) {
-                console.log('No token found, it is considered expired');
-                return true;
-            }
-
+            if (!token) return true;
             try {
-                const payload = JSON.parse(atob(token.split('.')[1])); // Decode token payload
-                const expirationTime = payload.exp * 1000; // Convert expiration time to milliseconds
-                const currentTime = Date.now();
-
-                if (currentTime > expirationTime) {
-                    console.log('Token has expired');
-                    return true;
-                }
-
-                console.log('Token is valid, not expired yet');
-                return false;
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                return Date.now() > payload.exp * 1000;
             } catch (err) {
-                console.error('Error parsing token:', err);
                 return true;
             }
         }
 
-        // Get Dashboard
         function getDashboard() {
-            const jwt = localStorage.getItem('jwt'); // Get the token from localStorage
-            if (isTokenExpired(jwt)) { // Check if the token has expired
-                console.log('Token has expired');
-                localStorage.removeItem('jwt'); // Remove expired token
-                window.location.href = '/'; // Redirect to login page
+            const token = localStorage.getItem('jwt');
+            if (!token || isTokenExpired(token)) {
+                alert('Session expired. Please log in again.');
+                localStorage.removeItem('jwt');
                 return;
             }
-
-            console.log("JWT used for dashboard:", jwt); // Log the token for debugging
             axios.get('http://localhost:3000/api/dashboard', {
-                headers: {
-                    'Authorization': `Bearer ${jwt}` // Send token in Authorization header
-                }
+                headers: { 'Authorization': `Bearer ${token}` }
             }).then(res => {
-                if (res && res.data && res.data.success) {
-                    document.querySelector('h1.row').innerHTML = 'Dashboard';
+                if (res.data.success) {
+                    document.querySelector('h1.row').innerText = 'Dashboard';
                     document.querySelector('main').innerHTML = res.data.myContent;
-                    changeRoute('/api/dashboard');
                 }
             }).catch(err => {
-                console.error("Error in getting dashboard:", err); // Log any errors
+                console.error("Dashboard error:", err);
             });
         }
 
-        // Get Settings
         function getSettings() {
-            const jwt = localStorage.getItem('jwt'); // Get the token from localStorage
-            if (isTokenExpired(jwt)) { // Check if the token has expired
-                console.log('Token has expired');
-                localStorage.removeItem('jwt'); // Remove expired token
-                window.location.href = '/'; // Redirect to login page
+            const token = localStorage.getItem('jwt');
+            if (!token || isTokenExpired(token)) {
+                alert('Session expired. Please log in again.');
+                localStorage.removeItem('jwt');
                 return;
             }
-
-            console.log("JWT used for settings:", jwt); // Log the token for debugging
             axios.get('http://localhost:3000/api/settings', {
-                headers: {
-                    'Authorization': `Bearer ${jwt}` // Send token in Authorization header
-                }
+                headers: { 'Authorization': `Bearer ${token}` }
             }).then(res => {
-                if (res && res.data && res.data.success) {
-                    document.querySelector('h1.row').innerHTML = 'Settings';
+                if (res.data.success) {
+                    document.querySelector('h1.row').innerText = 'Settings';
                     document.querySelector('main').innerHTML = res.data.myContent;
-                    changeRoute('/api/settings');
                 }
             }).catch(err => {
-                console.error("Error in getting settings:", err); // Log any errors
+                console.error("Settings error:", err);
             });
         }
-
-        // Change route without reloading
-        function changeRoute(route) {
-            history.pushState(null, null, route);
-        }
-
-        // Check token expiration on page load
-        function onLoad() {
-            const jwt = localStorage.getItem('jwt'); // Get the token from localStorage
-            if (jwt) {
-                const jwtPayload = JSON.parse(atob(jwt.split('.')[1])); // Decode token payload
-                const expirationTimeInMilliseconds = jwtPayload.exp * 1000; // Convert expiration time to milliseconds
-                const currentTimeInMilliseconds = Date.now(); // Get current time
-
-                if (currentTimeInMilliseconds >= expirationTimeInMilliseconds) { // Check if token has expired
-                    localStorage.removeItem('jwt'); // Remove expired token
-                    window.location.href = '/'; // Redirect to login page
-                }
-            }
-        }
-        setInterval(onLoad, 5000); // Check for token expiration every 5 seconds
     </script>
 </body>
 </html>
