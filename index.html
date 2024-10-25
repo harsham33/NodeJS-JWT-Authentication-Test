@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+<<<<<<< HEAD
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +8,17 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.7.7/axios.min.js"></script>
 </head>
+=======
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.7.7/axios.min.js" integrity="sha512-DdX/YwF5e41Ok+AI81HI8f5/5UsoxCVT9GKYZRIzpLxb8Twz4ZwPPX+jQMwMhNQ9b5+zDEefc+dcvQoPWGNZ3g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+</head>
+
+>>>>>>> c1c44bc (Completed instructions)
 <body>
     <div class="container-fluid">
         <h1 class="row">Login</h1>
@@ -26,13 +38,17 @@
             </div>
         </main>
     </div>
+<<<<<<< HEAD
 
+=======
+>>>>>>> c1c44bc (Completed instructions)
     <script>
         function login() {
             const data = {
                 username: document.getElementById('username').value,
                 password: document.getElementById('password').value,
             };
+<<<<<<< HEAD
             axios.post('http://localhost:3000/api/login', data).then(res => {
                 if (res.data.success) {
                     const token = res.data.token;
@@ -73,11 +89,43 @@
                 }
             }).catch(err => {
                 console.error("Dashboard error:", err);
+=======
+            axios.post('api/login', data).then(res => {
+                console.log(res);
+                document.getElementById('username').value = '';
+                document.getElementById('password').value = '';
+                if (res && res.data && res.data.success) {
+                    const token = res.data.token;
+                    localStorage.setItem('jwt', token);
+                    getDashboard();
+                }
+            });
+        }
+
+        function changeRoute(route) {
+            history.pushState(null, null, route);
+        }
+
+        function getDashboard() {
+            const jwt = localStorage.getItem('jwt');
+            axios.get('/api/dashboard', {
+                headers: {
+                    'Authorization': `Bearer ${jwt}`
+                }
+            }).then(res => {
+                if (res && res.data && res.data.success) {
+                    document.querySelector('h1.row').innerHTML = 'Dashboard';
+                    document.querySelector('main').innerHTML = res.data.myContent;
+                    changeRoute('/api/dashboard');
+                }
+
+>>>>>>> c1c44bc (Completed instructions)
             });
         }
 
         function getSettings() {
             const token = localStorage.getItem('jwt');
+<<<<<<< HEAD
             if (!token || isTokenExpired(token)) {
                 alert('Session expired. Please log in again.');
                 localStorage.removeItem('jwt');
@@ -97,3 +145,43 @@
     </script>
 </body>
 </html>
+=======
+            axios.get('/api/settings', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            }).then(res => {
+                if (res && res.data && res.data.success) {
+                    document.querySelector('h1.row').innerHTML = 'Settings';
+                    document.querySelector('main').innerHTML = res.data.myContent;
+                }
+                changeRoute('/api/settings');
+            });
+        }
+
+        function tokenExpire() {
+            window.location = '/';
+        }
+
+        function onLoad() {
+            const jwt = localStorage.getItem('jwt');
+
+            if (jwt) {
+                const jwtPayload = JSON.parse(atob(jwt.split('.')[1]));
+                const expirationTimeInSeconds = jwtPayload.exp;
+                const expirationTimeInMilliseconds = expirationTimeInSeconds * 1000;
+
+                const currentTimeInMilliseconds = Date.now();
+                if (currentTimeInMilliseconds >= expirationTimeInMilliseconds) {
+                    localStorage.removeItem('jwt')
+                    window.location.href = '/'
+                    clearInterval(intervalId);
+                }
+            }
+        }
+        const intervalId = setInterval(onLoad, 5000);
+    </script>
+</body>
+
+</html>
+>>>>>>> c1c44bc (Completed instructions)
