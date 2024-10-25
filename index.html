@@ -1,14 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-<<<<<<< HEAD
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JWT Authentication</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.7.7/axios.min.js"></script>
-</head>
-=======
 
 <head>
     <meta charset="UTF-8">
@@ -18,7 +9,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.7.7/axios.min.js" integrity="sha512-DdX/YwF5e41Ok+AI81HI8f5/5UsoxCVT9GKYZRIzpLxb8Twz4ZwPPX+jQMwMhNQ9b5+zDEefc+dcvQoPWGNZ3g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
 
->>>>>>> c1c44bc (Completed instructions)
 <body>
     <div class="container-fluid">
         <h1 class="row">Login</h1>
@@ -38,58 +28,12 @@
             </div>
         </main>
     </div>
-<<<<<<< HEAD
-
-=======
->>>>>>> c1c44bc (Completed instructions)
     <script>
         function login() {
             const data = {
                 username: document.getElementById('username').value,
                 password: document.getElementById('password').value,
             };
-<<<<<<< HEAD
-            axios.post('http://localhost:3000/api/login', data).then(res => {
-                if (res.data.success) {
-                    const token = res.data.token;
-                    localStorage.setItem('jwt', token); 
-                    console.log("Token stored:", token);
-                    getDashboard(); 
-                } else {
-                    alert('Login failed. Please check your credentials.');
-                }
-            }).catch(err => {
-                console.error("Login error:", err);
-            });
-        }
-
-        function isTokenExpired(token) {
-            if (!token) return true;
-            try {
-                const payload = JSON.parse(atob(token.split('.')[1]));
-                return Date.now() > payload.exp * 1000;
-            } catch (err) {
-                return true;
-            }
-        }
-
-        function getDashboard() {
-            const token = localStorage.getItem('jwt');
-            if (!token || isTokenExpired(token)) {
-                alert('Session expired. Please log in again.');
-                localStorage.removeItem('jwt');
-                return;
-            }
-            axios.get('http://localhost:3000/api/dashboard', {
-                headers: { 'Authorization': `Bearer ${token}` }
-            }).then(res => {
-                if (res.data.success) {
-                    document.querySelector('h1.row').innerText = 'Dashboard';
-                    document.querySelector('main').innerHTML = res.data.myContent;
-                }
-            }).catch(err => {
-                console.error("Dashboard error:", err);
-=======
             axios.post('api/login', data).then(res => {
                 console.log(res);
                 document.getElementById('username').value = '';
@@ -119,33 +63,11 @@
                     changeRoute('/api/dashboard');
                 }
 
->>>>>>> c1c44bc (Completed instructions)
             });
         }
 
         function getSettings() {
             const token = localStorage.getItem('jwt');
-<<<<<<< HEAD
-            if (!token || isTokenExpired(token)) {
-                alert('Session expired. Please log in again.');
-                localStorage.removeItem('jwt');
-                return;
-            }
-            axios.get('http://localhost:3000/api/settings', {
-                headers: { 'Authorization': `Bearer ${token}` }
-            }).then(res => {
-                if (res.data.success) {
-                    document.querySelector('h1.row').innerText = 'Settings';
-                    document.querySelector('main').innerHTML = res.data.myContent;
-                }
-            }).catch(err => {
-                console.error("Settings error:", err);
-            });
-        }
-    </script>
-</body>
-</html>
-=======
             axios.get('/api/settings', {
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -184,4 +106,3 @@
 </body>
 
 </html>
->>>>>>> c1c44bc (Completed instructions)
